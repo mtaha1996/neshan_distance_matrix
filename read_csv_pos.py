@@ -1,5 +1,6 @@
 from excel_export import excel
 import requests
+import API_key
 
 import pandas as pd
 
@@ -58,7 +59,7 @@ class DistanceMatrix:
         url = "https://api.neshan.org/v1/distance-matrix"
 
         params = self.create_params_for_url()
-        headers = {"Api-Key": "service.aYJyb8rJYo8mePEBpNzhn3CnE1yR7jbhhVQt3ic1"}
+        headers = {"Api-Key": API_key.api_key}
 
         resp = requests.get(url, params=params, headers=headers)
 
