@@ -5,6 +5,28 @@ import API_key
 import pandas as pd
 
 
+def save_to_excel(path, response):
+
+    res_min = []
+    res_meter = []
+
+    for row_idx in range(len(response["rows"])):
+        res_min.append([])
+        res_meter.append([])
+
+        res_min[row_idx].append(response["origin_addresses"][row_idx])
+        res_meter[row_idx].append(response["origin_addresses"][row_idx])
+
+        for elm in response["rows"][row_idx]["elements"]:
+            res_min[row_idx].append(elm["duration"]["value"] // 60)
+            res_meter[row_idx].append(elm["distance"]["value"])
+
+    res_min.insert(0, ["origins \\ destinations"] + response["destination_addresses"])
+    res_meter.insert(0, ["origins \\ destinations"] + response["destination_addresses"])
+
+    excel(res_min, res_meter, path)
+
+
 class DistanceMatrix:
     def __init__(self, path_raw_csv, header=None):
         # path to .csv file that contains the data
@@ -64,7 +86,7 @@ class DistanceMatrix:
         resp = requests.get(url, params=params, headers=headers)
 
         if resp.status_code == 200:
-            self.save_to_excel("", resp.json())
+            save_to_excel("", resp.json())
             return resp.json()
         else:
             return resp.json()
@@ -78,19 +100,3 @@ class DistanceMatrix:
         params = {"origins": org, "destinations": dest}
 
         return params
-
-    def save_to_excel(self, path, response):
-
-        res = []
-
-        for row_idx in range(len(response["rows"])):
-            res.append([])
-            res[row_idx].append(response["origin_addresses"][row_idx])
-            for elm in response["rows"][row_idx]["elements"]:
-                res[row_idx].append("{} sec, {} meters".format(
-                    elm["duration"]["value"],
-                    elm["distance"]["value"]))
-
-        res.insert(0, ["origins \\ destinations"] + response["destination_addresses"])
-
-        excel(res, path)
